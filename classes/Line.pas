@@ -6,6 +6,11 @@ uses GfxHelpers;
 
 type
   TLine = class
+  {
+  class for creating simple line objects defined by a starting and
+  ending (X,Y) Cartesian co-ordinate and a glyph with which to draw 
+  the line
+  }
     private
       StartXY: TCartesian;
       EndXY: TCartesian;
@@ -33,32 +38,45 @@ const
   LinePause = 0;
   GlyphPause = 0;
 
-// default values supplied to start and end Cartesians
 constructor TLine.Create;
+{
+constructor to create a new TLine object with default 
+values supplied for StartXY, EndXY and Glyph attributes
+}
 begin
-  StartXY.Px := 60;
+  StartXY.Px := 1;
   StartXY.Py := 1;
-  EndXY.Px := 60;
-  EndXY.Py := 11;
+  EndXY.Px := 1;
+  EndXY.Py := 1;
   Glyph := WideChar(#$258A);
 end;
 
-// default values supplied to start and end Cartesians
 constructor TLine.Create(CustomGlyph: WideChar);
+{
+constructor to create a new TLine object with a specified
+value for the Glyph attribute only
+}
 begin
   Glyph := CustomGlyph;
 end;
 
-// overloaded constructor with specified values for X, Y and H
 constructor TLine.Create(Args: TLineVals);
+{
+overloaded constructor with specified values for only the
+StartXY and EndXY attributes
+}
 begin
   StartXY := Args.PStart;
   EndXY := Args.PEnd;
   Glyph := WideChar(#$258A);
 end;
 
-// overloaded constructor with specified values for X, Y and H
+// 
 constructor TLine.Create(Args: TLineVals; CustomGlyph: WideChar);
+{
+overloaded constructor with specified values for the StartXY,
+EndXY and Glyph attributes
+}
 begin
   StartXY := Args.PStart;
   EndXY := Args.PEnd;
@@ -66,22 +84,34 @@ begin
 end;
 
 procedure TLine.SetStartXY(PStart: TCartesian);
+{
+sets the StartXY attribute to a new value
+}
 begin
   StartXY := PStart;
 end;
 
 procedure TLine.SetEndXY(PEnd: TCartesian);
+{
+sets the EndXY attribute to a new value
+}
 begin
   EndXY := PEnd;
 end;
 
 procedure TLine.SetGlyph(CustomGlyph: WideChar);
+{
+sets the Glyph attribute to a new value
+}
 begin
   Glyph := CustomGlyph;
 end;
 
 procedure TLine.DrawLine;
-
+{
+draws the line based on its current StartXY 
+and EndXY Cartesian co-ordinate attributes
+}
 var
   LengthX: Integer;
   LengthY: Integer;
@@ -247,6 +277,10 @@ begin
 end;
 
 procedure TLine.ModifyLine(Args: TLineVals);
+{
+modifies the starting and ending co-ordinates for an
+existing  line and redraws it
+}
 begin
   // set new position
   StartXY := Args.PStart;
@@ -256,4 +290,3 @@ begin
 end;
 
 end.
-

@@ -4,47 +4,73 @@ interface
 
 uses SysUtils;
 
-type ENonPositiveInt = Class(Exception);
+const
+  sLineBreak = {$IFDEF LINUX} AnsiChar(#10) {$ENDIF} 
+               {$IFDEF MSWINDOWS} AnsiString(#13#10) {$ENDIF};
+
+type ECartesianOutOfRange = Class(Exception);
+
+type Coordinate = 1..1280;
 
 type
-  // record for X,Y co-ordinates
   TCartesian = record
-    Px, Py: Integer;
+  {
+  record representing a Cartesian co-ordinate of two integers
+  }
+    Px, Py: Coordinate;
   end;
 
-  // record for initialising a TLine object
   TLineVals = record
+  {
+  record representing a pair of Cartesian co-ordinates
+  }
     PStart, PEnd: TCartesian;
   end;
 
 function MakeCartesian(X: Integer; Y: Integer): TCartesian;
-function MakeTLineVals(StartXY: TCartesian; EndXY: TCartesian): TLineVals;
+function MakeTLineVals(StartX, StartY, EndX, EndY: Integer): TLineVals;
 
 implementation
 
+
 function MakeCartesian(X: Integer; Y: Integer): TCartesian;
-var
-  Cartesian: TCartesian;
+{
+creates a valid TCartesian record based on a pair of integers 
+representing an X,Y co-ordinate
+}
 begin
-  if (X > 0) and (Y > 0) then
-  begin
-    Cartesian.Px := X;
-    Cartesian.Py := Y;
-  end
-  else
-  begin
-    raise ENonPositiveInt.create('Both X and Y must be positive integers!');
+  try
+    Result.Px := X;
+    Result.Py := Y;
+  except
+    on E: ERangeError do
+    begin
+      raise ECartesianOutOfRange.create('ERROR: Attempted to create invalid co-ordinate (' + 
+      X.ToString + ',' + Y.ToString + 
+      ') during call to function GfxHelpers.MakeCartesian' + sLineBreak +
+      'HINT: Co-ordinate (X,Y) integers can only range from 1 to 1280');
+    end;
   end;
-  Result := Cartesian;
 end;
 
-function MakeTLineVals(StartXY: TCartesian; EndXY: TCartesian): TLineVals;
-var
-  LineVals: TLineVals;
+function MakeTLineVals(StartX, StartY, EndX, EndY: Integer): TLineVals;
+{
+creates a TLineVals record based on a pair of valid Cartesian co-ordinates
+}
 begin
-  LineVals.PStart := StartXY;
-  LineVals.PEnd := EndXY;
-  Result := LineVals;
+  try
+    Result.PStart := MakeCartesian(StartX, StartY);
+    Result.PEnd := MakeCartesian(EndX, EndY);
+  except
+    on E: ECartesianOutOfRange do
+    begin
+      Writeln('Exception occurred in GfxHelpers.MakeTLineVals while calling GfxHelpers.MakeCartesian');
+      Writeln(E.Message);
+      Result.PStart := MakeCartesian(1,1); // prevent range errors
+      Result.PEnd := MakeCartesian(1,1); // prevent range errors
+      raise;
+    end;
+  end;
 end;
 
 begin
