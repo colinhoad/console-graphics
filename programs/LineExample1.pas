@@ -12,7 +12,7 @@ const
   InitialY = 24;       // top left corner of wall tile (Y co-ordinate)
   Length = 14;         // wall tile height
   Frames = 6;          // number of frames of animation
-  PauseTime = 300;     // pause between each redraw
+  PauseTime = 100;     // pause between each redraw
 
 type
   TileArray = array[1..MaxTileArray] of TLine; // wall tile array
@@ -35,7 +35,7 @@ begin
 
   // clear screen
   ClrScr;
-  cursoroff; // only works on Windows
+  cursoroff; // only works on Microsoft Windows
 
   // initialise wall tile array of TLine objects
   for  I := 1 to MaxTileArray do
@@ -44,16 +44,16 @@ begin
   // initialise floor and ceiling line objects
   for I := 1 to MaxPlaneArray do
     begin
-    CeilingLines[I] := TLine.Create(CeilingGlyph);
-    FloorLines[I] := TLine.Create(FloorGlyph);
+      CeilingLines[I] := TLine.Create(CeilingGlyph);
+      FloorLines[I] := TLine.Create(FloorGlyph);
     end;
 
   try
   // start animation loop
   repeat
+    // movement away
     for F := 0 to Frames do
     begin
-      // movement away
       for I := 1 to MaxTileArray do
       begin
         // draw floor and ceiling lines
@@ -91,7 +91,7 @@ begin
           );
         end;
 
-        // Now draw end of hallway tile
+        // now draw end of hallway tile
         if (I > (F*2)) and (I < (MaxTileArray - (F*2))) then
         begin
           TileLines[I].ModifyLine(
@@ -109,105 +109,93 @@ begin
       // erase floor and ceiling
       for I := 1 to MaxPlaneArray do
       begin
-        FloorLines[I].SetGlyph(EraseGlyph);
-        FloorLines[I].DrawLine;
-        FloorLines[I].SetGlyph(FloorGlyph);
-        CeilingLines[I].SetGlyph(EraseGlyph);
-        CeilingLines[I].DrawLine;
-        CeilingLines[I].SetGlyph(CeilingGlyph);
+        FloorLines[I].EraseLine;
+        CeilingLines[I].EraseLine;
       end;
       // erase tile
       for I := 1 to MaxTileArray do
       begin
-        TileLines[I].SetGlyph(EraseGlyph);
         if (I > F) and (I < (MaxTileArray - F)) then
         begin
-          TileLines[I].DrawLine;
+          TileLines[I].EraseLine;
         end;
-        TileLines[I].SetGlyph(WallGlyph);
       end;
 
   end;
-{
-  // Movement towards loop
+
+  // movement towards loop
   for F := Frames downto 0 do
-  begin
-      // Draw initial position of TLines
+    begin
       for I := 1 to MaxTileArray do
       begin
-        // Draw floor and ceiling lines
+        // draw floor and ceiling lines
         if I = (1 + (F*2)) then
         begin
-          // floor (Left)
-          LineVals.PStart.Px := 1;
-          LineVals.PStart.Py := MaxScreenY;
-          LineVals.PEnd.Px := (InitialX-1) + I;
-          LineVals.PEnd.Py := ((InitialY+2) + Length) - F;
-          floorLineL.ModifyLine(LineVals);
-          // Ceiling (Left)
-          LineVals.PStart.Px := 1;
-          LineVals.PStart.Py := 1;
-          LineVals.PEnd.Px := (InitialX-1) + I;
-          LineVals.PEnd.Py := (InitialY-2) + F;
-          CeilingL.ModifyLine(LineVals);
+          // floor (left)
+          FloorLines[1].ModifyLine(
+            MakeTLineVals(
+              1, MaxScreenY,
+              (InitialX-1) + I, ((InitialY+2) + Length) - F)
+          );
+          // ceiling (left)
+          CeilingLines[1].ModifyLine(
+            MakeTLineVals(
+              1, 1,
+              (InitialX-1) + I, (InitialY-2) + F
+            )
+          );
         end
         else if I = (MaxTileArray - (F*2)) then
         begin
-          // floor (Right)
-          LineVals.PStart.Px := MaxScreenX;
-          LineVals.PStart.Py := MaxScreenY;
-          LineVals.PEnd.Px := (InitialX+1) + I;
-          LineVals.PEnd.Py := ((InitialY+2) + Length) - F;
-          floorLineR.ModifyLine(LineVals);
-          // Ceiling (Right)
-          LineVals.PStart.Px := MaxScreenX;
-          LineVals.PStart.Py := 1;
-          LineVals.PEnd.Px := (InitialX+1) + I;
-          LineVals.PEnd.Py := (InitialY-2) + F;
-          CeilingR.ModifyLine(LineVals);
+          // floor (right)
+          FloorLines[MaxPlaneArray].ModifyLine(
+            MakeTLineVals(
+              MaxScreenX, MaxScreenY,
+              (InitialX+1) + I, ((InitialY+2) + Length) - F
+            )
+          );
+          // ceiling (right)
+          CeilingLines[MaxPlaneArray].ModifyLine(
+            MakeTLineVals(
+              MaxScreenX, 1,
+              (InitialX+1) + I, (InitialY-2) + F
+            )
+          );
         end;
-        // Now draw end of hallway tile
+
+        // now draw end of hallway tile
         if (I > (F*2)) and (I < (MaxTileArray - (F*2))) then
         begin
-          TileLines[I].SetGlyph(WallGlyph);
-          LineVals.PStart.Px := InitialX + I;
-          LineVals.PStart.Py := InitialY + F;
-          LineVals.PEnd.Px := InitialX + I;
-          LineVals.PEnd.Py := (InitialY + Length) - F;
-          TileLines[I].ModifyLine(LineVals);
+          TileLines[I].ModifyLine(
+            MakeTLineVals(
+              InitialX + I, InitialY + F,
+              InitialX + I, (InitialY + Length) - F
+            )
+          );
         end;
 
       end;
 
       Delay(PauseTime);
-    
-      // Erase initial position of TLines
-      floorLineL.SetGlyph(EraseGlyph);
-      floorLineR.SetGlyph(EraseGlyph);
-      CeilingL.SetGlyph(EraseGlyph);
-      CeilingR.SetGlyph(EraseGlyph);
-      floorLineL.DrawLine;
-      floorLineR.DrawLine;
-      CeilingL.DrawLine;
-      CeilingR.DrawLine;
-      floorLineL.SetGlyph(FloorGlyph);
-      floorLineR.SetGlyph(FloorGlyph);
-      CeilingL.SetGlyph(CeilingGlyph);
-      CeilingR.SetGlyph(CeilingGlyph);
+
+      // erase floor and ceiling
+      for I := 1 to MaxPlaneArray do
+      begin
+        FloorLines[I].EraseLine;
+        CeilingLines[I].EraseLine;
+      end;
+      // erase tile
       for I := 1 to MaxTileArray do
       begin
-        TileLines[I].SetGlyph(EraseGlyph);
         if (I > F) and (I < (MaxTileArray - F)) then
         begin
-          TileLines[I].DrawLine;
+          TileLines[I].EraseLine;
         end;
-        TileLines[I].SetGlyph(WallGlyph);
       end;
-
-
   end;
-}
+
   until KeyPressed = true;
+
   except
     on E: ECartesianOutOfRange do
     begin

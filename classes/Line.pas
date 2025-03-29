@@ -25,6 +25,7 @@ type
       procedure SetEndXY(PEnd: TCartesian);
       procedure SetGlyph(CustomGlyph: WideChar);
       procedure DrawLine;
+      procedure EraseLine;
   end;
 
 implementation
@@ -287,6 +288,24 @@ begin
   EndXY := Args.PEnd;
   // draw new position
   DrawLine;
+end;
+
+procedure TLine.EraseLine;
+{
+sets the line glyph to a space and redraws it, then sets 
+the line glyph back to its original value again
+}
+var
+  TempGlyph: WideChar;
+begin
+  // back up existing glyph value
+  TempGlyph := Glyph;
+  // set glyph to space
+  Glyph := ' ';
+  // draw line using space glyph
+  DrawLine;
+  // restore glyph value
+  Glyph := TempGlyph;
 end;
 
 end.
