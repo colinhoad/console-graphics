@@ -2,7 +2,8 @@ unit GfxHelpers;
 
 interface
 
-uses SysUtils;
+uses
+  SysUtils;
 
 const
   sLineBreak = {$IFDEF LINUX} AnsiChar(#10) {$ENDIF} 

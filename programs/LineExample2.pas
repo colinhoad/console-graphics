@@ -1,18 +1,18 @@
-program LineExample1;
+program LineExample2;
 
 uses
-  SysUtils, Crt, Line, GfxHelpers;
+  SysUtils, Crt, Line, GfxHelpers, math;
 
 const
   MaxScreenX = 238;    // screen size width
   MaxScreenY = 58;     // screen size height
-  MaxTileArray = 32;   // width of wall tile
-  MaxPlaneArray = 2;   // number of lines defining a plane
-  InitialX = 100;      // top left corner of wall tile (X co-ordinate)
-  InitialY = 24;       // top left corner of wall tile (Y co-ordinate)
+  MaxTileArray = 36;   // width of wall tile
+  MaxPlaneArray = 36;  // number of lines defining a plane
+  InitialX = 101;      // top left corner of wall tile (X co-ordinate)
+  InitialY = 22;       // top left corner of wall tile (Y co-ordinate)
   Length = 14;         // wall tile height
   Frames = 6;          // number of frames of animation
-  PauseTime = 50;     // pause between each redraw
+  PauseTime = 300;     // pause between each redraw
 
 type
   TileArray = array[1..MaxTileArray] of TLine; // wall tile array
@@ -52,44 +52,29 @@ begin
     // movement away
     for F := 0 to Frames do
     begin
-      for I := 1 to MaxTileArray do
+      // draw floor and ceiling lines
+      for I := 1 to MaxPlaneArray do
       begin
-        // draw floor and ceiling lines
-        if I = (1 + (F*2)) then
+        if (I > (F*2)) and (I < (MaxPlaneArray - (F*2))) then
         begin
-          // floor (left)
-          FloorLines[1].ModifyLine(
+          // floor
+          FloorLines[I].ModifyLine(
             MakeTLineVals(
-              1, MaxScreenY,
-              (InitialX-1) + I, ((InitialY+2) + Length) - F)
+              (I*7), MaxScreenY,
+              (InitialX) + I, ((InitialY+2) + Length) - F)
           );
-          // ceiling (left)
-          CeilingLines[1].ModifyLine(
+          // ceiling
+          CeilingLines[I].ModifyLine(
             MakeTLineVals(
-              1, 1,
-              (InitialX-1) + I, (InitialY-2) + F
-            )
-          );
-        end
-        else if I = (MaxTileArray - (F*2)) then
-        begin
-          // floor (right)
-          FloorLines[MaxPlaneArray].ModifyLine(
-            MakeTLineVals(
-              MaxScreenX, MaxScreenY,
-              (InitialX+1) + I, ((InitialY+2) + Length) - F
-            )
-          );
-          // ceiling (right)
-          CeilingLines[MaxPlaneArray].ModifyLine(
-            MakeTLineVals(
-              MaxScreenX, 1,
-              (InitialX+1) + I, (InitialY-2) + F
+              (I*7), 1,
+              (InitialX) + I, (InitialY-2) + F
             )
           );
         end;
-
-        // now draw end of hallway tile
+      end;
+      // now draw end of hallway tile
+      for I := 1 to MaxTileArray do
+      begin
         if (I > (F*2)) and (I < (MaxTileArray - (F*2))) then
         begin
           TileLines[I].ModifyLine(
@@ -99,7 +84,6 @@ begin
             )
           );
         end;
-
       end;
 
       Delay(PauseTime);
@@ -107,9 +91,13 @@ begin
       // erase floor and ceiling
       for I := 1 to MaxPlaneArray do
       begin
-        FloorLines[I].EraseLine;
-        CeilingLines[I].EraseLine;
+        if (I > F) and (I < (MaxPlaneArray - F)) then
+        begin
+          FloorLines[I].EraseLine;
+          CeilingLines[I].EraseLine;
+        end;
       end;
+
       // erase tile
       for I := 1 to MaxTileArray do
       begin
@@ -124,44 +112,29 @@ begin
   // movement towards loop
   for F := Frames downto 0 do
     begin
-      for I := 1 to MaxTileArray do
+      // draw floor and ceiling lines
+      for I := 1 to MaxPlaneArray do
       begin
-        // draw floor and ceiling lines
-        if I = (1 + (F*2)) then
+        if (I > (F*2)) and (I < (MaxPlaneArray - (F*2))) then
         begin
-          // floor (left)
-          FloorLines[1].ModifyLine(
+          // floor
+          FloorLines[I].ModifyLine(
             MakeTLineVals(
-              1, MaxScreenY,
-              (InitialX-1) + I, ((InitialY+2) + Length) - F)
+              (I*7), MaxScreenY,
+              (InitialX) + I, ((InitialY+2) + Length) - F)
           );
-          // ceiling (left)
-          CeilingLines[1].ModifyLine(
+          // ceiling
+          CeilingLines[I].ModifyLine(
             MakeTLineVals(
-              1, 1,
-              (InitialX-1) + I, (InitialY-2) + F
-            )
-          );
-        end
-        else if I = (MaxTileArray - (F*2)) then
-        begin
-          // floor (right)
-          FloorLines[MaxPlaneArray].ModifyLine(
-            MakeTLineVals(
-              MaxScreenX, MaxScreenY,
-              (InitialX+1) + I, ((InitialY+2) + Length) - F
-            )
-          );
-          // ceiling (right)
-          CeilingLines[MaxPlaneArray].ModifyLine(
-            MakeTLineVals(
-              MaxScreenX, 1,
-              (InitialX+1) + I, (InitialY-2) + F
+              (I*7), 1,
+              (InitialX) + I, (InitialY-2) + F
             )
           );
         end;
-
-        // now draw end of hallway tile
+      end;
+      // now draw end of hallway tile
+      for I := 1 to MaxTileArray do
+      begin
         if (I > (F*2)) and (I < (MaxTileArray - (F*2))) then
         begin
           TileLines[I].ModifyLine(
@@ -171,7 +144,6 @@ begin
             )
           );
         end;
-
       end;
 
       Delay(PauseTime);
@@ -179,9 +151,13 @@ begin
       // erase floor and ceiling
       for I := 1 to MaxPlaneArray do
       begin
-        FloorLines[I].EraseLine;
-        CeilingLines[I].EraseLine;
+        if (I > F) and (I < (MaxPlaneArray - F)) then
+        begin
+          FloorLines[I].EraseLine;
+          CeilingLines[I].EraseLine;
+        end;
       end;
+
       // erase tile
       for I := 1 to MaxTileArray do
       begin
@@ -190,6 +166,7 @@ begin
           TileLines[I].EraseLine;
         end;
       end;
+
   end;
 
   until KeyPressed = true;

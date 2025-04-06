@@ -2,7 +2,8 @@ unit Line;
 
 interface
 
-uses GfxHelpers;
+uses 
+  GfxHelpers;
 
 type
   TLine = class
@@ -34,9 +35,6 @@ uses
   SysUtils, Crt, CwString, math;
 
 const
-  GridX = 120;
-  GridY = 40;
-  LinePause = 0;
   GlyphPause = 0;
 
 constructor TLine.Create;
