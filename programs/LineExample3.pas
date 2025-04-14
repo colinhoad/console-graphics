@@ -7,16 +7,15 @@ const
   MaxScreenX = 238;    // screen size width
   MaxScreenY = 58;     // screen size height
   MaxTileArray = 34;   // width of wall tile
-  MaxPlaneArray = 34;  // number of lines defining a plane
-  InitialX = 200;        // top left corner of wall tile (X co-ordinate)
+  InitialX = 30;       // top left corner of wall tile (X co-ordinate)
   InitialY = 22;       // top left corner of wall tile (Y co-ordinate)
   Length = 15;         // wall tile height
   Frames = 5;          // number of frames of animation
-  PauseTime = 100;     // pause between each redraw
+  PauseTime = 1000;     // pause between each redraw
 
 type
   TTileArray = array[1..MaxTileArray] of TLine; // wall tile array
-  TPlaneArray = array[1..MaxPlaneArray] of TLine; // for floor and ceiling lines
+  TPlaneArray = array[1..MaxScreenX] of TLine; // for floor and ceiling lines
 
 var
   I: Word; // array index for wall tile
@@ -29,29 +28,37 @@ var
   FloorGlyph:   WideChar = '-';
   CeilingGlyph: WideChar = '-';
 
-procedure DrawPlanes(FloorArray, CeilingArray: TPlaneArray; MaxArray, Frame, ScreenWidth, InitX, InitY, TileHeight: Integer);
+procedure DrawPlanes(FloorArray, CeilingArray: TPlaneArray; MaxArray, Frame, ScreenWidth, ScreenHeight, InitX, InitY, TileHeight: Integer);
 {
 draws the floor and ceiling lines
 }
 var
-  I: Integer;
-  M: Integer;
+  I: Integer; // iterator for Tile Array
+  M: Integer; // number of plane lines per tile array index
+  P: Integer; // iterator governing number of plane lines per tile line
+  Xs: Integer; // InitX start
+  Xe: Integer; // InitX end
 begin
-  M := ScreenWidth div MaxArray;
-  for I := 1 to MaxArray do
+  Xs := InitX + (Frame*2)+1;
+  Xe := InitX + (MaxArray - (Frame*2));
+  M := ScreenWidth div (MaxArray-(Frame*2));
+  P := 0;
+  for I := 1 to ScreenWidth do
   begin
+    if ((I mod M) = 0) and (P < (MaxArray-(Frame*4))-2) then
+      P := P + 1;
     // floor
     FloorArray[I].ModifyLine(
       MakeTLineVals(
-        (I*M), MaxScreenY,
-        (InitialX) + I, ((InitY + TileHeight)+2) - F)
-    );
+        I, MaxScreenY,
+        Xs+P, (InitY+TileHeight+2)-F
+    ));
     // ceiling
     CeilingArray[I].ModifyLine(
       MakeTLineVals(
-        (I*M), 1,
-        (InitialX) + I, ((InitY) - 2) + F )
-    );
+        I, 1,
+        Xs+P, (InitY-2)+F
+    ));
   end;
 end;
 
@@ -85,7 +92,7 @@ begin
     TileLines[I] := TLine.Create(WallGlyph);
 
   // initialise floor and ceiling line objects
-  for I := 1 to MaxPlaneArray do
+  for I := 1 to MaxScreenX do
     begin
       CeilingLines[I] := TLine.Create(CeilingGlyph);
       FloorLines[I] := TLine.Create(FloorGlyph);
@@ -99,7 +106,7 @@ begin
     begin
       ClrScr;
       // draw floor and ceiling lines
-      DrawPlanes(FloorLines, CeilingLines, MaxPlaneArray, F, MaxScreenX, InitialX, InitialY, Length);
+      DrawPlanes(FloorLines, CeilingLines, MaxTileArray, F, MaxScreenX, MaxScreenY, InitialX, InitialY, Length);
       // now draw end of hallway tile
       DrawTile(TileLines, MaxTileArray, F);
       // wait
@@ -111,7 +118,7 @@ begin
     begin
       ClrScr;
       // draw floor and ceiling lines
-      DrawPlanes(FloorLines, CeilingLines, MaxPlaneArray, F, MaxScreenX, InitialX, InitialY, Length);
+      DrawPlanes(FloorLines, CeilingLines, MaxTileArray, F, MaxScreenX, MaxScreenY, InitialX, InitialY, Length);
       // now draw end of hallway tile
       DrawTile(TileLines, MaxTileArray, F);
       // wait
